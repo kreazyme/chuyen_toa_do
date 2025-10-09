@@ -92,11 +92,18 @@ void main() {
 
 ---
 
-### 5. Gợi ý thêm
+### 5. Tính năng đã thêm
 
-- Thêm **history** (lịch sử chuyển đổi gần đây).
-- Cho phép **copy tọa độ nhanh**.
-- Hiển thị **khoảng cách đến vị trí hiện tại** (nếu bật GPS).
+- ✅ **History** (lịch sử chuyển đổi gần đây)
+- ✅ **Copy tọa độ nhanh** từ màn hình chi tiết
+- ✅ **Lấy vị trí hiện tại**:
+  - Trong chế độ WGS84 → VN2000: Tự động điền latitude/longitude hiện tại
+  - Trong chế độ VN2000 → WGS84: Tự động điền tọa độ VN2000 tương ứng với vị trí hiện tại
+  - Yêu cầu cấp quyền truy cập vị trí khi sử dụng tính năng này
+
+### 6. Gợi ý thêm
+
+- Hiển thị **khoảng cách đến vị trí hiện tại** (nếu bật GPS)
 
 ---
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/coordinate_converter.dart';
 import '../services/history_service.dart';
+import '../services/location_service.dart';
 import '../services/province_preferences.dart';
 import '../models/coordinate.dart';
 import 'coordinate_detail_screen.dart';
@@ -41,6 +42,59 @@ class _ConversionScreenState extends State<ConversionScreen> {
     setState(() {
       _selectedZone = lastProvince;
     });
+  }
+
+  Future<void> _getCurrentLocation() async {
+    if (_isLoading) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final position = await LocationService.getCurrentLocation();
+      if (position != null) {
+        if (_conversionMode == ConversionMode.wgs84ToVn2000) {
+          _latitudeController.text = position.latitude.toString();
+          _longitudeController.text = position.longitude.toString();
+        } else {
+          // For VN2000 to WGS84 mode, get current location and convert it to VN2000
+          final vn2000 = CoordinateConverter.wgs84ToVn2000(
+            latitude: position.latitude,
+            longitude: position.longitude,
+            province: _selectedZone,
+          );
+          _northingController.text = vn2000.northing.toString();
+          _eastingController.text = vn2000.easting.toString();
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Không thể lấy vị trí. Vui lòng kiểm tra quyền truy cập và GPS',
+              ),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi lấy vị trí: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -376,25 +430,49 @@ class _ConversionScreenState extends State<ConversionScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text(
-                          'Chuyển đổi',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
+                  child: Text(
+                    'Chuyển đổi',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 16),
+
+                // Location button
+                OutlinedButton.icon(
+                  onPressed: _isLoading ? null : _getCurrentLocation,
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 16,
+                      horizontal: 24,
+                    ),
+                    side: BorderSide(color: Colors.blue[700]!),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  icon: _isLoading
+                      ? SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.blue[700],
+                          ),
+                        )
+                      : Icon(Icons.my_location, color: Colors.blue[700]),
+                  label: Text(
+                    'Lấy vị trí hiện tại',
+                    style: TextStyle(
+                      color: Colors.blue[700],
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
 
                 // Example button
                 TextButton.icon(

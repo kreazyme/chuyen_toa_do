@@ -22,19 +22,20 @@ class CoordinateDetailScreen extends StatelessWidget {
     );
 
     try {
-      if (await canLaunchUrl(url)) {
-        await launchUrl(url, mode: LaunchMode.externalApplication);
-      } else {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Không thể mở bản đồ'),
-              backgroundColor: Colors.red,
+      final launched = await launchUrl(url, mode: LaunchMode.platformDefault);
+
+      if (!launched && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Không thể mở bản đồ. Vui lòng kiểm tra ứng dụng bản đồ.',
             ),
-          );
-        }
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     } catch (e) {
+      debugPrint('Error opening maps: $e');
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Lỗi: $e'), backgroundColor: Colors.red),
