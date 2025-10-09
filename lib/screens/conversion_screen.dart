@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import '../services/coordinate_converter.dart';
 import '../services/history_service.dart';
+import '../services/province_preferences.dart';
 import '../models/coordinate.dart';
 import 'coordinate_detail_screen.dart';
 import 'history_screen.dart';
 
-enum ConversionMode {
-  vn2000ToWgs84,
-  wgs84ToVn2000,
-}
+enum ConversionMode { vn2000ToWgs84, wgs84ToVn2000 }
 
 class ConversionScreen extends StatefulWidget {
   const ConversionScreen({super.key});
@@ -19,18 +17,31 @@ class ConversionScreen extends StatefulWidget {
 
 class _ConversionScreenState extends State<ConversionScreen> {
   final _formKey = GlobalKey<FormState>();
-  
+
   // VN2000 to WGS84 controllers
   final _northingController = TextEditingController();
   final _eastingController = TextEditingController();
-  
+
   // WGS84 to VN2000 controllers
   final _latitudeController = TextEditingController();
   final _longitudeController = TextEditingController();
-  
+
   String _selectedZone = 'VN2000_TP_HCM';
   bool _isLoading = false;
   ConversionMode _conversionMode = ConversionMode.vn2000ToWgs84;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLastProvince();
+  }
+
+  Future<void> _loadLastProvince() async {
+    final lastProvince = await ProvincePreferences.getLastProvince();
+    setState(() {
+      _selectedZone = lastProvince;
+    });
+  }
 
   @override
   void dispose() {
@@ -72,10 +83,7 @@ class _ConversionScreenState extends State<ConversionScreen> {
           final latitude = double.parse(_latitudeController.text);
           final longitude = double.parse(_longitudeController.text);
 
-          wgs84 = WGS84Coordinate(
-            latitude: latitude,
-            longitude: longitude,
-          );
+          wgs84 = WGS84Coordinate(latitude: latitude, longitude: longitude);
 
           vn2000 = CoordinateConverter.wgs84ToVn2000(
             latitude: latitude,
@@ -126,9 +134,11 @@ class _ConversionScreenState extends State<ConversionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_conversionMode == ConversionMode.vn2000ToWgs84
-            ? 'VN2000 → WGS84'
-            : 'WGS84 → VN2000'),
+        title: Text(
+          _conversionMode == ConversionMode.vn2000ToWgs84
+              ? 'VN2000 → WGS84'
+              : 'WGS84 → VN2000',
+        ),
         elevation: 0,
         backgroundColor: Colors.grey[900],
         actions: [
@@ -204,6 +214,7 @@ class _ConversionScreenState extends State<ConversionScreen> {
                   // VN2000 to WGS84 inputs
                   TextFormField(
                     controller: _northingController,
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
                     decoration: InputDecoration(
                       labelText: 'Northing (Y)',
                       hintText: 'Ví dụ: 1189964',
@@ -230,6 +241,8 @@ class _ConversionScreenState extends State<ConversionScreen> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _eastingController,
+
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
                     decoration: InputDecoration(
                       labelText: 'Easting (X)',
                       hintText: 'Ví dụ: 600997',
@@ -265,6 +278,8 @@ class _ConversionScreenState extends State<ConversionScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
+
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                       signed: true,
@@ -288,6 +303,7 @@ class _ConversionScreenState extends State<ConversionScreen> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _longitudeController,
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
                     decoration: InputDecoration(
                       labelText: 'Longitude (Kinh độ)',
                       hintText: 'Ví dụ: 106.67523783',
@@ -339,11 +355,12 @@ class _ConversionScreenState extends State<ConversionScreen> {
                         ),
                       )
                       .toList(),
-                  onChanged: (value) {
+                  onChanged: (value) async {
                     if (value != null) {
                       setState(() {
                         _selectedZone = value;
                       });
+                      await ProvincePreferences.saveProvince(value);
                     }
                   },
                 ),
@@ -392,6 +409,7 @@ class _ConversionScreenState extends State<ConversionScreen> {
                     setState(() {
                       _selectedZone = 'VN2000_TP_HCM';
                     });
+                    ProvincePreferences.saveProvince('VN2000_TP_HCM');
                   },
                   icon: const Icon(Icons.lightbulb_outline),
                   label: const Text('Sử dụng ví dụ'),
@@ -407,7 +425,10 @@ class _ConversionScreenState extends State<ConversionScreen> {
     );
   }
 
-  Widget _buildModeButton({required String label, required ConversionMode mode}) {
+  Widget _buildModeButton({
+    required String label,
+    required ConversionMode mode,
+  }) {
     final isSelected = _conversionMode == mode;
     return InkWell(
       onTap: () {
