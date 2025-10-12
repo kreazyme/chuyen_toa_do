@@ -100,6 +100,20 @@ void main() {
   - Trong chế độ WGS84 → VN2000: Tự động điền latitude/longitude hiện tại
   - Trong chế độ VN2000 → WGS84: Tự động điền tọa độ VN2000 tương ứng với vị trí hiện tại
   - Yêu cầu cấp quyền truy cập vị trí khi sử dụng tính năng này
+- ✅ **Màn hình thông tin** giải thích về hệ tọa độ:
+  - Giới thiệu WGS84 và VN-2000 là gì
+  - Tại sao Việt Nam cần VN-2000
+  - Khi nào cần chuyển đổi giữa các hệ tọa độ
+  - Cơ sở pháp lý (Nghị quyết 48/2000/QĐ-TTg)
+  - Link đến văn bản chính thức trên trang Chính phủ
+
+#### 🧮 Màn hình 3: Thông tin về hệ tọa độ
+
+- Giải thích chi tiết về WGS84 và VN-2000
+- Lý do ra đời hệ tọa độ VN-2000
+- Hướng dẫn khi nào nên sử dụng hệ tọa độ nào
+- Cơ sở pháp lý và link văn bản chính thức
+- Truy cập qua nút thông tin (ℹ️) trên thanh công cụ
 
 ### 6. Gợi ý thêm
 

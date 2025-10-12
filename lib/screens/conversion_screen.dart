@@ -6,6 +6,7 @@ import '../services/province_preferences.dart';
 import '../models/coordinate.dart';
 import 'coordinate_detail_screen.dart';
 import 'history_screen.dart';
+import 'info_screen.dart';
 
 enum ConversionMode { vn2000ToWgs84, wgs84ToVn2000 }
 
@@ -196,6 +197,16 @@ class _ConversionScreenState extends State<ConversionScreen> {
         elevation: 0,
         backgroundColor: Colors.grey[900],
         actions: [
+          IconButton(
+            icon: const Icon(Icons.info_outline),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const InfoScreen()),
+              );
+            },
+            tooltip: 'Thông tin về hệ tọa độ',
+          ),
           IconButton(
             icon: const Icon(Icons.history),
             onPressed: () {
@@ -391,7 +402,7 @@ class _ConversionScreenState extends State<ConversionScreen> {
 
                 // Zone selector
                 DropdownButtonFormField<String>(
-                  initialValue: _selectedZone,
+                  value: _selectedZone,
                   decoration: InputDecoration(
                     labelText: 'Khu vực (Zone)',
                     prefixIcon: const Icon(Icons.location_city),
