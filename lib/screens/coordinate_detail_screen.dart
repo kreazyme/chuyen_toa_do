@@ -79,7 +79,7 @@ class CoordinateDetailScreen extends StatelessWidget {
                   TileLayer(
                     urlTemplate:
                         'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                    userAgentPackageName: 'com.example.chuyen_toa_do',
+                    userAgentPackageName: 'spoon.app.chuyen_toa_do',
                   ),
                   MarkerLayer(
                     markers: [
