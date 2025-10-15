@@ -78,8 +78,18 @@ class CoordinateDetailScreen extends StatelessWidget {
                 children: [
                   TileLayer(
                     urlTemplate:
-                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
                     userAgentPackageName: 'spoon.app.chuyen_toa_do',
+                    maxZoom: 19,
+                    subdomains: const ['a', 'b', 'c'],
+                    additionalOptions: const {
+                      'attribution': '© OpenStreetMap contributors',
+                    },
+                    errorTileCallback: (tile, error, stackTrace) {
+                      debugPrint('Error loading tile: $error');
+                    },
+                    fallbackUrl:
+                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                   ),
                   MarkerLayer(
                     markers: [
