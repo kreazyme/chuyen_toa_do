@@ -7,6 +7,8 @@ import '../models/coordinate.dart';
 import 'coordinate_detail_screen.dart';
 import 'history_screen.dart';
 import 'info_screen.dart';
+import 'location_picker_screen.dart';
+import 'package:latlong2/latlong.dart';
 
 enum ConversionMode { vn2000ToWgs84, wgs84ToVn2000 }
 
@@ -95,6 +97,59 @@ class _ConversionScreenState extends State<ConversionScreen> {
           _isLoading = false;
         });
       }
+    }
+  }
+
+  Future<void> _pickLocation() async {
+    // Determine initial center
+    double? initLat;
+    double? initLng;
+    if (_conversionMode == ConversionMode.wgs84ToVn2000) {
+      initLat = double.tryParse(_latitudeController.text);
+      initLng = double.tryParse(_longitudeController.text);
+    } else {
+      // If VN2000 mode and fields present, convert to WGS84 for initial view
+      final n = double.tryParse(_northingController.text);
+      final e = double.tryParse(_eastingController.text);
+      if (n != null && e != null) {
+        final w = CoordinateConverter.vn2000ToWgs84(
+          northing: n,
+          easting: e,
+          province: _selectedZone,
+        );
+        initLat = w.latitude;
+        initLng = w.longitude;
+      }
+    }
+
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LocationPickerScreen(
+          initialPosition: (initLat != null && initLng != null)
+              ? LatLng(initLat, initLng)
+              : null,
+        ),
+      ),
+    );
+
+    if (result == null) return;
+
+    // result is a LatLng
+    final lat = result.latitude as double;
+    final lng = result.longitude as double;
+
+    if (_conversionMode == ConversionMode.wgs84ToVn2000) {
+      _latitudeController.text = lat.toString();
+      _longitudeController.text = lng.toString();
+    } else {
+      final vn2000 = CoordinateConverter.wgs84ToVn2000(
+        latitude: lat,
+        longitude: lng,
+        province: _selectedZone,
+      );
+      _northingController.text = vn2000.northing.toString();
+      _eastingController.text = vn2000.easting.toString();
     }
   }
 
@@ -246,6 +301,30 @@ class _ConversionScreenState extends State<ConversionScreen> {
                   style: Theme.of(
                     context,
                   ).textTheme.bodyMedium?.copyWith(color: Colors.white60),
+                ),
+                const SizedBox(height: 24),
+
+                // Pick location button
+                OutlinedButton.icon(
+                  onPressed: _isLoading ? null : _pickLocation,
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 16,
+                      horizontal: 24,
+                    ),
+                    side: BorderSide(color: Colors.green[600]!),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  icon: const Icon(Icons.place, color: Colors.green),
+                  label: const Text(
+                    'Chọn vị trí trên bản đồ',
+                    style: TextStyle(
+                      color: Colors.green,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 24),
 
